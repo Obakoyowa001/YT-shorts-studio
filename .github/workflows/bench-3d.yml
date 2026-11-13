@@ -1,0 +1,51 @@
+name: 3D render benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "render3d/bench.py"
+      - ".github/workflows/bench-3d.yml"
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BLENDER: blender-4.2.3-linux-x64
+    steps:
+      - uses: actions/checkout@v4
+      - name: System packages (software OpenGL for EEVEE)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libglx-mesa0 libgl1-mesa-dri libegl1 libxi6 \
+            libxkbcommon0 libsm6 libxrender1 libxxf86vm1 libxfixes3 libxkbcommon-x11-0
+          nproc; free -g
+      - uses: actions/cache@v4
+        with:
+          path: ~/blender
+          key: ${{ env.BLENDER }}
+      - name: Download Blender
+        run: |
+          if [ ! -x ~/blender/$BLENDER/blender ]; then
+            mkdir -p ~/blender
+            curl -fsSL https://download.blender.org/release/Blender4.2/$BLENDER.tar.xz | tar -xJ -C ~/blender
+          fi
+          ~/blender/$BLENDER/blender --version | head -1
+      - name: Benchmark
+        run: |
+          B=~/blender/$BLENDER/blender
+          mkdir -p out
+          run() { xvfb-run -a -s "-screen 0 1280x1024x24" $B -b --python render3d/bench.py -- "$@" 2>&1 | grep -E "BENCH|Error|error" || true; }
+          export LIBGL_ALWAYS_SOFTWARE=1
+          run WORKBENCH 1080 1920 1 out/workbench_1080.png
+          run EEVEE 1080 1920 16 out/eevee_1080.png
+          run EEVEE 2160 3840 16 out/eevee_4k.png
+          run CYCLES 1080 1920 16 out/cycles_1080.png
+          run CYCLES 2160 3840 16 out/cycles_4k.png
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench-3d
+          path: out/*.png
+          retention-days: 7
