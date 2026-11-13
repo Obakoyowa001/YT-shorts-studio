@@ -46,6 +46,9 @@ LIB = {
     "bark": (["dog_bark"], -6),
     "growl": (["dog_growl"], -6),
     "meow": (["cat_meow"], -8),
+    "snip": (["knifeSlice", "knifeSlice2"], -8),
+    "bell": (["impactBell_heavy_000"], -16),
+    "whip": (["drawKnife1"], -10),
 }
 
 
@@ -187,6 +190,34 @@ def wind(dur, seed=5):
     x = lowpass_fast(x, 60)
     lfo = 0.6 + 0.4 * np.sin(np.linspace(0, dur * 0.7, n) * 2 * np.pi + 1)
     return (x * lfo / (np.max(np.abs(x)) + 1e-9)).astype(np.float32)
+
+
+def squeak(dur=0.25, f0=1800, f1=2600):
+    """Rusty wheel squeak: a short pitch-swept tone with rough edges."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = np.linspace(f0, f1, n) + np.sin(t * 2 * np.pi * 37) * 80
+    ph = np.cumsum(2 * np.pi * f / SR)
+    env = np.sin(np.linspace(0, np.pi, n)) ** 1.5
+    x = (np.sin(ph) + 0.3 * np.sign(np.sin(ph * 2))) * env
+    return (x / (np.max(np.abs(x)) + 1e-9)).astype(np.float32)
+
+
+def tick(dur=0.03):
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    x = np.sin(2 * np.pi * 3200 * t) * np.exp(-t * 260)
+    return x.astype(np.float32)
+
+
+def stretch(dur=1.2):
+    """Balloon / rubber stretch: low wobbling tone rising in pitch."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = 140 + 260 * (t / dur) ** 1.5 + np.sin(t * 2 * np.pi * 9) * 18
+    ph = np.cumsum(2 * np.pi * f / SR)
+    x = (np.sin(ph) + 0.4 * np.sin(ph * 2.01)) * np.minimum(1, t / 0.05) * np.minimum(1, (dur - t) / 0.1)
+    return (x / (np.max(np.abs(x)) + 1e-9)).astype(np.float32)
 
 
 def crickets(dur, seed=9):

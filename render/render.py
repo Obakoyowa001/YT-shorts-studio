@@ -28,6 +28,8 @@ AMBIENCE = {  # bg -> list of (generator, gain dB)
     "interior": [("room", -44)],
     "shop": [("room", -44)],
     "modern": [("room", -46)],
+    "sunrise": [("wind", -38)],
+    "sepia": [("wind", -40), ("room", -46)],
 }
 
 
@@ -89,6 +91,7 @@ def prep(args):
     m = A.Mixer(total)
     m.whoosh = A.whoosh()
     m.chime = A.chime()
+    m.squeak, m.tick, m.stretch = A.squeak(), A.tick(), A.stretch()
     m.vox = {}
     for tag, (txt, v, rate, pitch) in getattr(short, "VOCALS", {}).items():
         m.vox[tag] = A.vocal(txt, v, work, tag, rate, pitch)
@@ -107,7 +110,10 @@ def prep(args):
         m.add(m.whoosh, st - 0.08, -32)
     sfx = m.buf[: int(total * A.SR)]
 
-    bed = A.music(total)[: len(sfx)] * 10 ** (-21 / 20)
+    if getattr(short, "MUSIC", True):
+        bed = A.music(total)[: len(sfx)] * 10 ** (-21 / 20)
+    else:
+        bed = np.zeros(len(sfx), np.float32)
     vpad = np.zeros(len(sfx), np.float32)
     vpad[: min(len(voice), len(vpad))] = voice[: len(vpad)]
     bed = A.duck(bed, vpad, -8)

@@ -1,0 +1,166 @@
+name: Render 3D Short
+
+# Default: 3D frames rendered at 1080x1920 with Blender EEVEE, upscaled to 2160x3840, 30 fps.
+# Commit message flags: "[stills]" = one still per shot (fast look), "[preview]" = 540x960 video.
+on:
+  workflow_dispatch:
+    inputs:
+      short:
+        description: "Short (render/shorts/<name>.py + render3d/scenes/<name>.py)"
+        default: "s002"
+      mode:
+        description: "full, preview or stills"
+        default: "full"
+  push:
+    paths:
+      - "render3d/lib.py"
+      - "render3d/blender_shots.py"
+      - "render3d/post.py"
+      - "render3d/scenes/**"
+      - "render/shorts/s002.py"
+      - ".github/workflows/render-3d.yml"
+
+env:
+  SHORT: ${{ inputs.short || 's002' }}
+  MODE: ${{ inputs.mode || (contains(github.event.head_commit.message, '[stills]') && 'stills') || (contains(github.event.head_commit.message, '[preview]') && 'preview') || 'full' }}
+  SHARDS: 18
+  BLENDER: blender-4.2.3-linux-x64
+
+jobs:
+  prep:
+    name: Voice, sound mix and shot plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Packages and assets
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install numpy==2.1.3 edge-tts==7.3.1 piper-tts==1.3.0
+          bash render/fetch_assets.sh voices
+      - name: Prep
+        run: |
+          if [ "$MODE" = "full" ]; then W=2160; H=3840; else W=540; H=960; fi
+          python render/render.py prep --short "$SHORT" --width $W --height $H --fps 30 \
+            --shards $SHARDS --work out/work
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prep3d
+          path: |
+            out/work/plan.json
+            out/work/mix.wav
+          retention-days: 3
+
+  shots:
+    name: 3D shard ${{ matrix.shard }}
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: System packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg libcairo2-dev pkg-config xvfb libgl1 libglx-mesa0 \
+            libgl1-mesa-dri libegl1 libxi6 libxkbcommon0 libsm6 libxrender1 libxxf86vm1 \
+            libxfixes3 libxkbcommon-x11-0
+          pip install pillow==11.0.0 numpy==2.1.3 pycairo==1.27.0
+          bash render/fetch_assets.sh fonts
+      - uses: actions/cache@v4
+        with:
+          path: ~/blender
+          key: ${{ env.BLENDER }}
+      - name: Blender
+        run: |
+          if [ ! -x ~/blender/$BLENDER/blender ]; then
+            mkdir -p ~/blender
+            curl -fsSL https://download.blender.org/release/Blender4.2/$BLENDER.tar.xz | tar -xJ -C ~/blender
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep3d
+          path: out/work
+      - name: Render 3D frames
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          if [ "$MODE" = "full" ]; then RW=1080; RH=1920; SAMPLES=16; else RW=540; RH=960; SAMPLES=8; fi
+          if [ "$MODE" = "stills" ]; then export STILLS=1; RW=1080; RH=1920; fi
+          xvfb-run -a -s "-screen 0 1280x1024x24" ~/blender/$BLENDER/blender -b \
+            --python render3d/blender_shots.py -- out/work/plan.json ${{ matrix.shard }} out/frames \
+            $RW $RH $SAMPLES 2>&1 | grep -E "SHOT|Error|error|Traceback|File \"" || true
+          ls out/frames/*/ | head
+      - name: Captions and encode
+        if: env.MODE != 'stills'
+        run: python render3d/post.py out/work/plan.json ${{ matrix.shard }} out/frames out/work
+      - uses: actions/upload-artifact@v4
+        if: env.MODE != 'stills'
+        with:
+          name: shots3d-${{ matrix.shard }}
+          path: out/work/shot*.mp4
+          compression-level: 0
+          retention-days: 3
+      - uses: actions/upload-artifact@v4
+        if: env.MODE == 'stills'
+        with:
+          name: stills-${{ matrix.shard }}
+          path: out/frames/**/*.png
+          retention-days: 7
+
+  assemble:
+    name: Assemble video
+    needs: shots
+    if: ${{ (inputs.mode || (contains(github.event.head_commit.message, '[stills]') && 'stills') || 'x') != 'stills' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Packages
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install numpy==2.1.3
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep3d
+          path: out/work
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: shots3d-*
+          merge-multiple: true
+          path: out/work
+      - name: Assemble
+        run: |
+          NAME="${SHORT}_${MODE}"
+          echo "NAME=$NAME" >> "$GITHUB_ENV"
+          python render/render.py assemble --work out/work --out "out/$NAME.mp4"
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate:format=duration,size \
+            -of default=nw=1 "out/$NAME.mp4"
+          ffmpeg -v error -y -i "out/$NAME.mp4" -vf "fps=1/2.5,scale=270:-1,tile=6x4" -frames:v 1 out/frames.jpg
+          ffmpeg -v error -y -i "out/$NAME.mp4" -vf "scale=540:960" -c:v libx264 -crf 28 \
+            -preset veryfast -c:a aac -b:a 96k out/preview_540p.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.SHORT }}-video
+          path: out/${{ env.NAME }}.mp4
+          compression-level: 0
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.SHORT }}-preview
+          path: |
+            out/frames.jpg
+            out/preview_540p.mp4
+          retention-days: 30

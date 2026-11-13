@@ -14,7 +14,8 @@ on:
         default: false
   push:
     paths:
-      - "render/**"
+      - "render/engine.py"
+      - "render/shorts/s001.py"
       - ".github/workflows/render-short.yml"
 
 env:
