@@ -26,14 +26,17 @@ words = plan["words"]
 gold_words = set(getattr(story, "GOLD_WORDS", []))
 step = int(os.environ.get("FRAME_STEP", "1"))
 
-for sh in plan["shots"]:
+shots = {s["idx"]: s for s in plan["shots"]}
+for sh in plan.get("chunks") or plan["shots"]:
     if sh["shard"] != shard and shard >= 0:
         continue
+    full = shots[sh["idx"]]
     folder = os.path.join(frames_dir, "shot%02d" % sh["idx"])
     if not os.path.isdir(folder):
         continue
     seg = story.SEGMENTS[sh["idx"]]
-    out = os.path.join(work, "shot%02d.mp4" % sh["idx"])
+    out = os.path.join(work, ("shot%02d_p%02d.mp4" % (sh["idx"], sh["part"])) if "part" in sh
+                       else "shot%02d.mp4" % sh["idx"])
     ff = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgra",
                            "-s", f"{W}x{H}", "-r", str(fps), "-i", "-", "-c:v", "libx264",
                            "-preset", "fast", "-crf", "17", "-pix_fmt", "yuv420p", out],
@@ -41,7 +44,7 @@ for sh in plan["shots"]:
     wi = 0
     last = None
     for f in range(sh["f0"], sh["f1"]):
-        k = f - sh["f0"]
+        k = f - full["f0"]
         src = os.path.join(folder, "%05d.png" % (k - k % step))
         if os.path.exists(src):
             last = src
@@ -51,7 +54,7 @@ for sh in plan["shots"]:
         buf = bytearray(img.tobytes("raw", "BGRA"))
         surf = cairo.ImageSurface.create_for_data(buf, cairo.FORMAT_ARGB32, W, H, W * 4)
         tg = f / fps
-        tl = tg - sh["f0"] / fps
+        tl = tg - full["f0"] / fps
         c = E.Canvas(surf, S, W, H, tl)
         c.cam(drift=0)
         if seg.get("badge"):

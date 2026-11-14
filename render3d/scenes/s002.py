@@ -50,7 +50,7 @@ def s01(d):
     def update(t):
         for i, p in enumerate(ps):
             p.update(t + i * 0.3, 1.0 if t > 0.3 + i * 0.25 else 0.0)
-        cam.move((0, -16, 13), (0.5, -11, 3.8), t / d, (0, 3, 3.5), (0.3, 3, 1.8), t)
+        cam.move((0, -13, 10), (0.4, -8.0, 3.0), t / d, (0, 3, 3.2), (0.4, 3, 2.0), t)
     return update
 
 
@@ -58,9 +58,9 @@ def s01(d):
 def s02(d):
     lighting("day")
     town(presses=False)
-    press = Press((-0.6, 1.7, 0), 1.0)
-    stack = CashStack((-2.2, 1.2, 0), (1.0, 0.6))
-    boss = Person("boss", (1.3, 0.7, 0))
+    press = Press((-0.2, 2.3, 0), 1.0)
+    stack = CashStack((-1.2, 1.3, 0), (1.0, 0.6))
+    boss = Person("boss", (0.9, 0.6, 0))
     cam = Cam(35, dof=2.8)
 
     def update(t):
@@ -139,7 +139,7 @@ def s06(d):
     lighting("interior")
     bakery_interior()
     loaf((0, 0.75, 1.42), s=0.9)
-    tag = PriceTag((0.55, 0.15, 1.55), "$1", s=0.8)
+    tag = PriceTag((0.15, 0.15, 1.6), "$1", s=0.6)
     tag.root.rotation_euler = (0, 0, -0.15)
     Person("baker", (1.6, 2.0, 0)).pose(0.0, arms=(20, 60), mouth="smile", look=-0.5)
     cam = Cam(45, dof=1.6)
@@ -149,9 +149,9 @@ def s06(d):
         u = prog(t, flip - 0.2, flip + 0.25)
         tag.root.rotation_euler = (u * math.tau, 0, -0.15)
         tag.set("$1" if t < flip else "$1,000")
-        s = 0.8 * (1 + 0.25 * math.sin(min(1.0, max(0.0, (t - flip) / 0.4)) * math.pi))
+        s = 0.6 * (1 + 0.25 * math.sin(min(1.0, max(0.0, (t - flip) / 0.4)) * math.pi))
         scale_all(tag.root, s)
-        cam.move((0.2, -2.4, 1.9), (0.3, -1.7, 1.75), t / d, (0.3, 0.6, 1.45), (0.4, 0.4, 1.5), t)
+        cam.move((0.1, -3.2, 1.9), (0.1, -2.6, 1.8), t / d, (0.1, 0.4, 1.5), (0.15, 0.3, 1.55), t)
     return update
 
 
@@ -204,7 +204,7 @@ def s09(d):
         tree((x, y, 0), 1.1)
     boss = Person("boss", (-6, -0.5, 0), rot_z=math.pi / 2)
     wb = wheelbarrow((-4.4, -0.5, 0), rot_z=0)
-    cam = Cam(30, dof=4)
+    cam = Cam(24, dof=4)
 
     def update(t):
         x = lerp(-6, 1.5, t / d)
@@ -223,8 +223,8 @@ def s10(d):
     lighting("interior")
     bakery_interior()
     loaf((0, 0.75, 1.42), s=0.9)
-    tag = PriceTag((0, 0.0, 2.3), "$1,000", s=1.6)
-    cam = Cam(40, dof=2.2)
+    tag = PriceTag((0, 0.0, 2.3), "$1,000", s=1.0, width=2.6)
+    cam = Cam(36, dof=2.2)
 
     def update(t):
         u = prog(t, 0.1, d - 0.25)
@@ -232,8 +232,8 @@ def s10(d):
         v = int(round(v, -len(str(v)) + 2)) if v > 1000 else v
         tag.set(f"${v:,}")
         tag.root.rotation_euler = (math.sin(t * 5) * 0.05, 0, math.sin(t * 3) * 0.12)
-        scale_all(tag.root, 1.6 + 0.15 * u)
-        cam.move((0, -4.6, 2.5), (0, -3.6, 2.4), t / d, (0, 0, 2.2), (0, 0, 2.3), t)
+        scale_all(tag.root, 1.0 + 0.1 * u)
+        cam.move((0, -7.0, 2.5), (0, -6.2, 2.4), t / d, (0, 0, 2.1), (0, 0, 2.2), t)
     return update
 
 
@@ -266,14 +266,14 @@ def s12(d):
     lighting("interior")
     ground(mat(C["wood_l"], 0.8))
     box((0, 3, 3), (14, 0.3, 6), mat(C["cream"], 0.85), 0)
-    box((0, 2.8, 4.6), (4.6, 0.12, 0.7), mat(C["cream"], 0.6), 0.03)
-    text("ZIMBABWE 2008", (0, 2.72, 4.6), 0.42, mat(C["black"], 0.5), font="sign")
-    box((-1.6, 2.7, 2.5), (1.8, 0.15, 2.0), mat(C["white"], 0.6), 0.04)
-    box((-1.6, 2.6, 3.25), (1.8, 0.12, 0.5), mat(C["red"], 0.5), 0.03)
-    day = text("1", (-1.6, 2.55, 2.3), 1.1, mat(C["black"], 0.5))
-    box((1.8, 2.7, 2.5), (2.6, 0.15, 2.0), mat(C["grey_d"], 0.5), 0.04)
-    text("BREAD", (1.8, 2.6, 3.05), 0.42, mat(C["white"], 0.4))
-    price = text("$100", (1.8, 2.6, 2.2), 0.62, mat(C["gold"], 0.3, emit=0.6))
+    box((0, 2.8, 5.0), (3.4, 0.12, 0.6), mat(C["cream"], 0.6), 0.03)
+    text("ZIMBABWE 2008", (0, 2.72, 5.0), 0.3, mat(C["black"], 0.5), font="sign")
+    box((0, 2.7, 3.4), (1.5, 0.15, 1.5), mat(C["white"], 0.6), 0.04)
+    box((0, 2.6, 4.0), (1.5, 0.12, 0.35), mat(C["red"], 0.5), 0.03)
+    day = text("1", (0, 2.55, 3.25), 0.85, mat(C["black"], 0.5))
+    box((0, 2.7, 1.7), (3.0, 0.15, 1.6), mat(C["grey_d"], 0.5), 0.04)
+    text("BREAD", (0, 2.6, 2.2), 0.36, mat(C["white"], 0.4))
+    price = text("$100", (0, 2.6, 1.55), 0.5, mat(C["gold"], 0.3, emit=0.6))
     cam = Cam(34)
     step = 0.35
 
@@ -283,7 +283,7 @@ def s12(d):
         price.data.body = f"${100 * 2 ** k:,}"
         u = (t % step) / step
         price.scale = (1 + 0.15 * (1 - u), 1 + 0.15 * (1 - u), 1)
-        cam.move((0, -6.5, 2.9), (0, -5.4, 2.8), t / d, (0, 2.6, 2.7), (0, 2.6, 2.7), t)
+        cam.move((0, -7.6, 3.3), (0, -6.8, 3.2), t / d, (0, 2.6, 3.2), (0, 2.6, 3.2), t)
     return update
 
 
@@ -327,7 +327,7 @@ def s14(d):
     blades = [box((0.15, 0, 0), (0.35, 0.03, 0.06), mat(C["steel"], 0.2, metal=0.9), 0.01, sc)
               for _ in range(2)]
     ch, head = chicken((0, 0, 0), 0.75)
-    cam = Cam(32, dof=4)
+    cam = Cam(26, dof=4)
 
     def update(t):
         snip = abs(math.sin(t * 11)) * 0.5
@@ -351,7 +351,7 @@ def s15(d):
     lighting("interior")
     bakery_interior()
     ch, head = chicken((0, 0.8, 1.17), 1.1, rot_z=0.4)
-    label = text("BARTER", (0, 0.6, 2.75), 0.7, mat(C["gold"], 0.25, metal=0.3, emit=0.4))
+    label = text("BARTER", (0, 0.6, 2.6), 0.34, mat(C["gold"], 0.25, metal=0.3, emit=0.4))
     cam = Cam(42, dof=1.8)
 
     def update(t):
@@ -404,7 +404,7 @@ def s17(d):
     def update(t):
         p.update(t, 0.25)
         pike.pose(t, arms=(15, 25), mouth="smile", look=-0.3)
-        cam.move((0, -11, 4.4), (0, -6.5, 5.1), t / d, (0, 0, 5.0), (0, 0, 5.35), t)
+        cam.move((0, -13, 4.4), (0, -9.5, 5.1), t / d, (0, 0, 5.0), (0, 0, 5.35), t)
     return update
 
 

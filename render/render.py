@@ -10,6 +10,7 @@
 import argparse
 import importlib
 import json
+import math
 import multiprocessing as mp
 import os
 import re
@@ -126,14 +127,26 @@ def prep(args):
     for i, (a, b) in enumerate(zip(starts, ends)):
         f0, f1 = round(a * fps), round(b * fps)
         shots.append(dict(idx=i, f0=f0, f1=f1))
-    # balance shots across shards by frame count (greedy)
+    # split long shots into chunks (3D renders), then balance across shards (greedy)
+    units = []
+    for sh in shots:
+        if args.chunk:
+            n = max(1, math.ceil((sh["f1"] - sh["f0"]) / args.chunk))
+            size = math.ceil((sh["f1"] - sh["f0"]) / n)
+            for p in range(n):
+                a = sh["f0"] + p * size
+                units.append(dict(idx=sh["idx"], part=p, f0=a, f1=min(sh["f1"], a + size)))
+        else:
+            units.append(sh)
     loads = [0] * args.shards
-    for sh in sorted(shots, key=lambda s: s["f1"] - s["f0"], reverse=True):
+    for u in sorted(units, key=lambda s: s["f1"] - s["f0"], reverse=True):
         k = loads.index(min(loads))
-        sh["shard"] = k
-        loads[k] += sh["f1"] - sh["f0"]
+        u["shard"] = k
+        loads[k] += u["f1"] - u["f0"]
     plan = dict(short=args.short, fps=fps, width=args.width, height=args.height,
                 shards=args.shards, shots=shots, words=words, total=total)
+    if args.chunk:
+        plan["chunks"] = units
     json.dump(plan, open(os.path.join(work, "plan.json"), "w"))
     print(f"plan: {len(shots)} shots, {round(total * fps)} frames @ {fps} fps, "
           f"shard loads {loads}")
@@ -203,8 +216,11 @@ def assemble(args):
     plan = json.load(open(os.path.join(args.work, "plan.json")))
     lst = os.path.join(args.work, "shots.txt")
     with open(lst, "w") as f:
-        for s in plan["shots"]:
-            seg_path = os.path.abspath(os.path.join(args.work, "shot%02d.mp4" % s["idx"]))
+        units = plan.get("chunks") or plan["shots"]
+        for s in units:
+            name = ("shot%02d_p%02d.mp4" % (s["idx"], s["part"])) if "part" in s else \
+                ("shot%02d.mp4" % s["idx"])
+            seg_path = os.path.abspath(os.path.join(args.work, name))
             f.write("file '%s'\n" % seg_path)
     silent = os.path.join(args.work, "video.mp4")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", lst,
@@ -227,6 +243,7 @@ def main():
     ap.add_argument("--fps", type=int, default=60)
     ap.add_argument("--shards", type=int, default=1)
     ap.add_argument("--shard", type=int, default=None)
+    ap.add_argument("--chunk", type=int, default=0, help="max frames per render unit (3D)")
     ap.add_argument("--work", default="out/work")
     ap.add_argument("--out", default="out/short.mp4")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)

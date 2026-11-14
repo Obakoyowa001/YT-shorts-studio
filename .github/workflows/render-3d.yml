@@ -45,7 +45,7 @@ jobs:
         run: |
           if [ "$MODE" = "full" ]; then W=2160; H=3840; else W=540; H=960; fi
           python render/render.py prep --short "$SHORT" --width $W --height $H --fps 30 \
-            --shards $SHARDS --work out/work
+            --shards $SHARDS --chunk 45 --work out/work
       - uses: actions/upload-artifact@v4
         with:
           name: prep3d

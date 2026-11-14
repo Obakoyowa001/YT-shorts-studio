@@ -22,14 +22,16 @@ only = {int(x) for x in argv[6].split(",")} if len(argv) > 6 and argv[6] else No
 scenes = importlib.import_module(f"scenes.{plan['short']}")
 fps = plan["fps"]
 
-for sh in plan["shots"]:
+shots = {s["idx"]: s for s in plan["shots"]}
+for sh in plan.get("chunks") or plan["shots"]:
     if sh["shard"] != shard and shard >= 0:
         continue
+    full = shots[sh["idx"]]
     if only is not None and sh["idx"] not in only:
         continue
     t0 = time.time()
     lib.reset()
-    d = (sh["f1"] - sh["f0"]) / fps
+    d = (full["f1"] - full["f0"]) / fps
     update = scenes.SHOTS[sh["idx"]](d)
     lib.setup_render(W, H, samples)
     folder = os.path.join(out_dir, "shot%02d" % sh["idx"])
@@ -37,13 +39,15 @@ for sh in plan["shots"]:
     step = int(os.environ.get("FRAME_STEP", "1"))
     frames = range(sh["f0"], sh["f1"], step)
     if os.environ.get("STILLS") == "1":   # one frame per shot, 60% of the way in
-        frames = [sh["f0"] + int((sh["f1"] - sh["f0"]) * 0.6)]
+        if sh.get("part", 0):
+            continue
+        frames = [full["f0"] + int((full["f1"] - full["f0"]) * 0.6)]
     for f in frames:
-        t = (f - sh["f0"]) / fps
+        t = (f - full["f0"]) / fps
         update(t)
         bpy.context.view_layer.update()
-        bpy.context.scene.render.filepath = os.path.join(folder, "%05d.png" % (f - sh["f0"]))
+        bpy.context.scene.render.filepath = os.path.join(folder, "%05d.png" % (f - full["f0"]))
         bpy.ops.render.render(write_still=True)
     n = len(frames)
-    print(f"SHOT {sh['idx']:02d}: {n} frames in {time.time() - t0:.0f}s "
+    print(f"SHOT {sh['idx']:02d}.{sh.get('part', 0)}: {n} frames in {time.time() - t0:.0f}s "
           f"({(time.time() - t0) / max(1, n):.1f}s/frame)", flush=True)

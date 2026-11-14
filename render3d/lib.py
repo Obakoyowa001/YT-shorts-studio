@@ -448,11 +448,11 @@ def loaf(loc, par=None, s=1.0):
 
 
 class PriceTag:
-    def __init__(self, loc, value="$1", par=None, s=1.0):
+    def __init__(self, loc, value="$1", par=None, s=1.0, width=1.3):
         self.root = empty(loc, par)
         self.root.scale = (s, s, s)
-        box((0, 0, 0), (1.3, 0.06, 0.6), mat(C["white"], 0.5), 0.04, self.root)
-        cyl((-0.55, -0.02, 0.18), 0.05, 0.08, mat(C["black"], 0.5), rot=(math.pi / 2, 0, 0),
+        box((0, 0, 0), (width, 0.06, 0.6), mat(C["white"], 0.5), 0.04, self.root)
+        cyl((-width / 2 + 0.1, -0.02, 0.18), 0.05, 0.08, mat(C["black"], 0.5), rot=(math.pi / 2, 0, 0),
             par=self.root)
         self.txt = text(value, (0.08, -0.06, -0.02), 0.36, mat(C["red"], 0.4), self.root)
 
