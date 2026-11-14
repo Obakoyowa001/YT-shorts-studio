@@ -12,7 +12,7 @@ import bpy
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import lib  # noqa: E402
-from lib import (C, CashStack, Person, area, box, chicken, cyl, ground, house, mat, text,  # noqa: E402
+from lib import (C, CashStack, Person, area, ball, box, chicken, cyl, ground, house, mat, text,  # noqa: E402
                  tree, world)
 
 argv = sys.argv[sys.argv.index("--") + 1:]
@@ -63,6 +63,14 @@ def coin_disc(loc, r, tilt=0.6):
     return o
 
 
+def happy_mouth(p):
+    """Open smile with teeth (branding close-ups only; video model unchanged)."""
+    p.mouth.data.materials[0] = mat(lib.hexc("#5A1E1E"), 0.5)
+    p.mouth.scale = (1.9, 0.5, 0.75)
+    ball(tuple(p.mouth.location + type(p.mouth.location)((0, -0.035, 0.03))), 0.08,
+         mat(C["white"], 0.3), (1.6, 0.35, 0.28), p.neck)
+
+
 def flying_cash(n, x_range, z_range, y=0.6, seed=3):
     import random
     r = random.Random(seed)
@@ -82,6 +90,7 @@ area((-3, -5, 4), (60, 0, -35), 900, 5, (1, 0.95, 0.9))                         
 area((3.5, 2, 4), (60, 0, 150), 700, 3, (1, 0.9, 0.75))                         # rim
 gus = Person("gus", (0, 0, 0))
 gus.pose(0.35, arms=(25, 150), mouth="grin", look=0.0, blink=False)
+happy_mouth(gus)
 gus.neck.rotation_euler = (0.05, 0.12, 0.08)
 camera((0.15, -4.2, 2.75), (0.12, 0, 2.45), 70)
 cycles(1080, 1080)
@@ -101,9 +110,11 @@ for x, y, s in ((-11, 12, 1.3), (-3.5, 13, 1.2), (4.5, 12.5, 1.4), (11.5, 11, 1.
 # key elements inside the safe band (centre 1546x423 px of 2560x1440)
 gus = Person("gus", (-1.55, 0.2, 0))
 gus.pose(0.35, arms=(30, 155), mouth="grin", look=0.25, blink=False)
+happy_mouth(gus)
 title = text("ASK GUS", (0.62, 0, 2.52), 0.66, mat(C["gold"], 0.25, metal=0.3), extrude=0.09)
 title_shadow = text("ASK GUS", (0.66, 0.05, 2.48), 0.66, mat(C["black"], 0.6), extrude=0.09)
-text("how money really works", (0.62, 0, 1.98), 0.2, mat(C["white"], 0.4), extrude=0.03)
+box((0.62, 0.06, 2.0), (2.7, 0.06, 0.36), mat(lib.hexc("#2B1D16"), 0.6), 0.06)      # ribbon
+text("HOW MONEY REALLY WORKS", (0.62, 0, 1.99), 0.2, mat(C["gold"], 0.3), extrude=0.02)
 ch, head = chicken((2.75, -0.2, 1.05), 0.6, rot_z=0.5)
 st = CashStack((-3.3, 0.6, 0), (1.0, 0.6))
 st.set_level(26)
