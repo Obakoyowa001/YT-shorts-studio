@@ -1,6 +1,6 @@
-# YT Shorts Studio
+# Ask Gus — Shorts Studio
 
-Production repo for our faceless YouTube Shorts channel: short, funny explainers about how money really works, starring our own cast (the Boss, Gus, Mo and Inspector Pike). Every video is scripted here and rendered in the cloud by GitHub Actions, so nothing renders on a personal computer.
+Production repo for **Ask Gus**, our faceless YouTube Shorts channel: short, funny explainers about how money really works, starring our own cast (the Boss, Gus, Mo and Inspector Pike). Every video is scripted here and rendered in the cloud by GitHub Actions, so nothing renders on a personal computer.
 
 ## What's here
 

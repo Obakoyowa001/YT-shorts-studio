@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Script & Render Engine
 
-This is the production repo for our faceless YouTube Shorts channel. It holds the formula (below), our scripts, and the code that renders the videos in the cloud. The format was reverse-engineered from the Shorts channel **Wobbly Business** (`@wobblybusiness`); we reuse the *formula*, never their assets. The raw research (their downloaded videos, transcripts and shot-by-shot breakdowns) is kept in the owner's private research repo, not here.
+This is the production repo for **Ask Gus**, our faceless YouTube Shorts channel. Gus (the lovable fall guy) is the face of the brand: he appears in every episode, and the channel name should show up in-world (a shop sign, a mug, a poster) in every video. It holds the formula (below), our scripts, and the code that renders the videos in the cloud. The format was reverse-engineered from the Shorts channel **Wobbly Business** (`@wobblybusiness`); we reuse the *formula*, never their assets. The raw research (their downloaded videos, transcripts and shot-by-shot breakdowns) is kept in the owner's private research repo, not here.
 
 ---
 
