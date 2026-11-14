@@ -99,7 +99,8 @@ def prep(args):
     gens = {"wind": A.wind, "crickets": A.crickets, "room": A.room}
     for seg, a, b in zip(short.SEGMENTS, starts, ends):
         d = b - a
-        for name, g in AMBIENCE.get(seg.get("bg", "day"), []):
+        for name, g in (AMBIENCE.get(seg.get("bg", "day"), [])
+                        if getattr(short, "AMBIENCE", True) else []):
             x = gens[name](d + 0.1)
             fade = min(len(x) // 2, int(0.05 * A.SR))
             x[:fade] *= np.linspace(0, 1, fade)
@@ -108,7 +109,12 @@ def prep(args):
         if seg.get("audio"):
             seg["audio"](m, a, d)
     for st in starts[1:]:
-        m.add(m.whoosh, st - 0.08, -32)
+        m.add(m.whoosh, st - 0.08, getattr(short, "CUT_WHOOSH_DB", -32))
+    if getattr(short, "WORD_POPS", False):
+        gw = set(getattr(short, "GOLD_WORDS", []))
+        for st, _, w in words:
+            if A.norm(w) in gw or any(ch.isdigit() for ch in w):
+                m.sfx("pop", st, -10)
     sfx = m.buf[: int(total * A.SR)]
 
     if getattr(short, "MUSIC", True):

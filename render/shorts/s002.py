@@ -4,9 +4,12 @@ Story + sound side of the Short. The 3D visuals for each shot live in
 render3d/scenes/s002.py (same order). No music: sound effects and ambience only.
 """
 MUSIC = False
+AMBIENCE = False      # no wind/room-tone bed: narration + sound effects only
+WORD_POPS = True      # soft pop on every gold caption word
+CUT_WHOOSH_DB = -22   # audible whoosh on every cut
 VOICE = "en-US-GuyNeural"
 RATE = "+40%"
-GOLD_WORDS = {"millionaire", "gus", "million", "dollar", "thousand", "inflation", "wheelbarrow",
+GOLD_WORDS = {"machine", "minute", "legal", "rich", "problem", "everyone", "millionaire", "gus", "million", "dollar", "thousand", "inflation", "wheelbarrow",
               "hyperinflation", "germany", "towers", "zimbabwe", "doubled", "eggs", "chicken",
               "barter", "bank", "slowly", "money"}
 
@@ -20,24 +23,27 @@ VOCALS = {
 
 
 def a01(m, T, d):
-    for k in range(int(d / 0.42)):
-        m.sfx("press", T + 0.2 + k * 0.42, -8)
-        m.sfx("paper", T + 0.3 + k * 0.42, -10)
+    m.sfx("ding", T + 0.0, 2)               # cha-ching on frame one
+    m.sfx("coins", T + 0.05, 0)
+    m.add(m.whoosh, T + 0.0, -12)           # camera rush
+    for k in range(int(d / 0.16)):          # machine firing bills
+        m.sfx("press" if k % 3 == 0 else "paper", T + 0.15 + k * 0.16, -6 if k % 3 == 0 else -4)
 
 
 def a02(m, T, d):
-    m.sfx("press", T + 0.05, -6)
+    m.sfx("thud", T + 0.05, 0)              # lands in the cash pile
     for k in range(6):
-        m.sfx("paper", T + 0.1 + k * 0.22, -6)
-    m.add(m.vox.get("yay"), T + 0.5, -10)
-    m.add(m.chime, T + 0.3, -18)
+        m.sfx("paper", T + 0.1 + k * 0.15, -2)
+    m.add(m.vox.get("yay"), T + 0.35, -6)
+    m.add(m.chime, T + 0.2, -12)
 
 
 def a03(m, T, d):
-    m.add(m.whoosh, T, -18)
-    for k in range(4):
-        m.sfx("coins", T + 0.3 + k * 0.5, -12)
-    m.sfx("cloth", T + d - 0.6, -2)
+    m.sfx("stamp", T + 0.05, -4)            # record-scratch style hit on "one problem"
+    m.add(m.whoosh, T + 0.2, -12)
+    for k in range(5):
+        m.sfx("coins", T + 0.4 + k * 0.35, -8)
+    m.sfx("cloth", T + d - 0.6, 0)
 
 
 def a04(m, T, d):
@@ -133,11 +139,12 @@ def a18(m, T, d):
 
 
 SEGMENTS = [
-    dict(text="Imagine tomorrow, everyone is allowed to print their own money.", bg="sunrise",
-         audio=a01),
-    dict(text="Congratulations. You're a millionaire.", bg="day", audio=a02),
-    dict(text="So is your neighbour. So is Gus.", bg="day", audio=a03),
-    dict(text="Step one, you print a million dollars and run to the store.", bg="day", audio=a04,
+    dict(text="You have a machine that prints a million dollars a minute, and it's totally legal.",
+         bg="interior", audio=a01),
+    dict(text="Congratulations. You're rich.", bg="day", audio=a02),
+    dict(text="There's just one problem. So is everyone else. Including Gus.", bg="day",
+         audio=a03),
+    dict(text="Step one, you grab a million and run to the store.", bg="day", audio=a04,
          badge=("STEP 1", 0.05)),
     dict(text="But Gus printed ten million, and he got there first.", bg="interior", audio=a05),
     dict(text="The shopkeeper isn't dumb. If everyone has a million, a loaf of bread isn't worth "

@@ -43,14 +43,39 @@ def bakery_interior():
 
 # 1 ------------------------------------------------------------------------
 def s01(d):
-    lighting("sunrise")
-    ps = town()
-    cam = Cam(30)
+    """Hook: garage money machine blasting cash at the camera, legal and glowing."""
+    lighting("interior")
+    ground(mat(C["grey"], 0.8))
+    box((0, 3.2, 3), (14, 0.3, 6), mat(C["grey_d"], 0.9), 0)                 # back wall
+    door = box((-3.6, 3.0, 1.6), (3.2, 0.12, 3.2), mat(C["white"], 0.6), 0.03)
+    for k in range(6):
+        box((-3.6, 2.92, 0.3 + k * 0.5), (3.2, 0.04, 0.05), mat(C["grey"], 0.5), 0)
+    for x in (2.8, 4.6):
+        box((x, 2.9, 2.2), (1.6, 0.5, 0.08), mat(C["wood_d"], 0.6), 0.02)       # shelves
+    big = Press((0.2, 1.4, 0), 2.2)
+    glow = box((0.2, 0.62, 2.3), (1.9, 0.06, 0.12), mat(C["money"], 0.3, emit=6.0), 0.02)
+    point((0.2, 0.0, 2.2), 600, (0.5, 1.0, 0.6), 0.6)
+    box((0.2, 1.4, 3.65), (2.6, 0.12, 0.7), mat(C["cream"], 0.6), 0.04)
+    text("$1,000,000 / MIN", (0.2, 1.32, 3.65), 0.32, mat(C["red"], 0.4))
+    text("100% LEGAL", (0.2, 0.55, 1.75), 0.2, mat(C["money_d"], 0.4))
+    pile = CashStack((-1.9, 0.4, 0), (1.2, 0.8))
+    boss = Person("boss", (2.2, 0.2, 0), rot_z=-0.3)
+    flyers = [box((0, 0, 0), (0.5, 0.25, 0.015), mat(C["money"], 0.6), 0.005) for _ in range(26)]
+    cam = Cam(28, dof=3.0)
 
     def update(t):
-        for i, p in enumerate(ps):
-            p.update(t + i * 0.3, 1.0 if t > 0.3 + i * 0.25 else 0.0)
-        cam.move((0, -13, 10), (0.4, -8.0, 3.0), t / d, (0, 3, 3.2), (0.4, 3, 2.0), t)
+        big.update(t, 3.0)
+        pile.set_level(int(lerp(8, 40, prog(t, 0, d))))
+        boss.pose(t, arms=(150, 150), mouth="grin", bounce=abs(math.sin(t * 7)) * 0.07, look=-0.5)
+        for i, b in enumerate(flyers):
+            u = ((t * 1.4) + i / len(flyers)) % 1.0
+            a = i * 2.399
+            b.location = (0.2 + math.cos(a) * u * 2.6, 0.6 - u * 5.5, 1.6 + math.sin(a) * u * 1.8
+                          + math.sin(u * math.pi) * 0.8)
+            b.rotation_euler = (u * 7 + i, u * 5, i * 0.7)
+        rush = prog(t, 0.0, min(1.0, d * 0.35))
+        cam.set((lerp(0.0, 0.4, rush), lerp(-11, -4.6, rush), lerp(3.0, 2.1, rush)),
+                (0.2, 1.2, lerp(2.2, 1.9, rush)), t)
     return update
 
 
@@ -170,13 +195,13 @@ def s07(d):
     cam = Cam(32)
 
     def update(t):
-        s = lerp(0.3, 2.1, prog(t, 0.0, d * 0.9)) * (1 + 0.03 * math.sin(t * 9))
+        s = lerp(0.4, 2.6, prog(t, 0.0, d * 0.9)) * (1 + 0.03 * math.sin(t * 9))
         scale_all(bal, s)
         bal.location.z = 3.6 + s * 1.3
         string.location.z = 1.8 + s * 0.6
         string.scale.z = 0.4 + s * 0.6
         bal.rotation_euler = (0, math.sin(t * 2) * 0.08, math.sin(t * 1.3) * 0.15)
-        cam.move((0, -13, 3.5), (0, -11.5, 3.2), t / d, (0, 1, 4.5), (0, 1, 5.5), t)
+        cam.move((0, -9.5, 3.4), (0, -8.2, 3.6), t / d, (0, 1, 5.0), (0, 1, 6.2), t)
     return update
 
 

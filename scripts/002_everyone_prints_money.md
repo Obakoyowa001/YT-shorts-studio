@@ -15,11 +15,11 @@
 
 ## 2. Voiceover Script
 
-**Word count:** 214 · **Target rate:** ~220 WPM · **Est. duration:** ~58 s
+**Target rate:** ~220 WPM · **Est. duration:** ~57 s
 
-> Imagine tomorrow, everyone is allowed to print their own money. Congratulations. You're a **millionaire**. So is your neighbour. So is **Gus**.
+> You have a **machine** that prints a **million dollars a minute**, and it's totally **legal**. Congratulations. You're **rich**. There's just one **problem**. So is **everyone** else. Including **Gus**.
 >
-> Step one, you print a **million dollars** and run to the store. But Gus printed **ten million**, and he got there first. The shopkeeper isn't dumb. If everyone has a million, a loaf of bread isn't worth **one dollar** anymore. It's worth a **thousand**. This is called **inflation**.
+> Step one, you grab a **million** and run to the store. But Gus printed **ten million**, and he got there first. The shopkeeper isn't dumb. If everyone has a million, a loaf of bread isn't worth **one dollar** anymore. It's worth a **thousand**. This is called **inflation**.
 >
 > Step two, everyone prints more to keep up. The printers run all night. By Friday, one loaf costs a **wheelbarrow** of cash. This is called **hyperinflation**, and it really happened. In **Germany** in **1923**, kids built **towers** out of money. In **Zimbabwe**, prices **doubled every day**.
 >
@@ -37,9 +37,9 @@
 
 | # | Line | Scene |
 | :-- | :-- | :-- |
-| 1 | "Imagine tomorrow… print their own money." | Toy town at sunrise; every house has a little printing press on the porch spitting out bills. Slow crane-down. |
-| 2 | "Congratulations. You're a millionaire." | The Boss at his porch press, a growing stack of cash; confetti of bills. |
-| 3 | "So is your neighbour. So is Gus." | Pan across neighbours' porches, each with a cash stack; land on Gus hugging a giant stack. |
+| 1 | "You have a machine… totally legal." | **Hook, mid-action:** a garage money machine glowing green and blasting bills at the camera, a `$1,000,000 / MIN` sign, the Boss cheering beside a growing cash pile. Fast camera rush in. Cha-ching on frame one. |
+| 2 | "Congratulations. You're rich." | The Boss at his porch press, a growing stack of cash; confetti of bills. |
+| 3 | "There's just one problem… Including Gus." | Hit sound on "problem". Pan across neighbours' porches, each with a cash stack; land on Gus hugging a giant stack. |
 | 4 | "Step one… run to the store." | STEP 1 badge. The Boss sprints down the street with a briefcase of cash. |
 | 5 | "But Gus printed ten million… first." | Gus already at the bakery counter with a mountain of money. |
 | 6 | "The shopkeeper isn't dumb… worth a thousand." | Close-up price tag on a bread loaf: `$1` flips to `$1,000`. |
@@ -60,7 +60,7 @@
 
 ## 4. Sound Design (no music)
 
-Printer clunks and paper flutter, footsteps and running, a cash-register bell, a balloon stretching, night crickets, a wheelbarrow squeak, a stopwatch tick for the price board, cash being pushed away, egg-basket creak, chicken clucks, scissors snips, and a bank-vault thunk. The music bed is removed; ambience (wind, crickets, room tone) fills the gaps.
+No music and no ambience bed: the narrator plus sound effects only. A cha-ching and camera whoosh on the first frame, the money machine firing, a hit on "one problem", a whoosh on every cut, a soft pop on every highlighted caption word, footsteps and running, a shop bell, a balloon stretching, a wheelbarrow squeak, ticking price counters, cash being pushed away, chicken clucks, scissor snips and a bank-door thunk.
 
 ---
 
