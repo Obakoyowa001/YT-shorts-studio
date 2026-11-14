@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Script & Render Engine
 
-This is the production repo for **Ask Gus**, our faceless YouTube Shorts channel. Gus (the lovable fall guy) is the face of the brand: he appears in every episode, and the channel name should show up in-world (a shop sign, a mug, a poster) in every video. It holds the formula (below), our scripts, and the code that renders the videos in the cloud. The format was reverse-engineered from the Shorts channel **Wobbly Business** (`@wobblybusiness`); we reuse the *formula*, never their assets. The raw research (their downloaded videos, transcripts and shot-by-shot breakdowns) is kept in the owner's private research repo, not here.
+This is the production repo for **Ask Gus**, our faceless YouTube Shorts channel. Gus (the lovable fall guy) is the face of the brand. The channel name is not placed inside the videos; Gus himself is the branding. It holds the formula (below), our scripts, and the code that renders the videos in the cloud. The format was reverse-engineered from the Shorts channel **Wobbly Business** (`@wobblybusiness`); we reuse the *formula*, never their assets. The raw research (their downloaded videos, transcripts and shot-by-shot breakdowns) is kept in the owner's private research repo, not here.
 
 ---
 
@@ -46,6 +46,8 @@ Use a consistent cast of recurring characters so viewers build parasocial famili
 | **4. The Authority** | Inspector/tax man/banker who "does the math" and catches the scheme. | **Inspector Pike**: very tall and thin, grey long coat, top hat, giant magnifying glass. |
 
 Design guidance: pick a visual style and silhouettes clearly different from the reference channel's (different art style, palette, proportions, signature outfits). Use these names in every script.
+
+**Gus is always on-model.** He is the face of the channel (also the avatar and banner), so never redesign him between episodes: red beanie with a white pom-pom, brown beard, red plaid shirt, blue jeans, bare feet, big friendly grin. Use the shared `Person("gus")` model in `render3d/lib.py` for every 3D video. Every episode gives Gus at least one moment (usually the Act IV payoff) and ideally ends on him.
 
 ### Rule 4: Visual Gags & Diegetic Props (Show, Don't Just Tell)
 Hard-cut to a new shot roughly every 2.5 seconds (22–25 shots per Short), and keep the camera moving / new props or text popping in every ~1.5–2 seconds within each shot, so every beat lands on a new physical gag or close-up prop with **huge, readable in-world text**:

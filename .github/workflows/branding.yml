@@ -1,0 +1,43 @@
+name: Channel branding (3D)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "render3d/branding.py"
+      - ".github/workflows/branding.yml"
+
+jobs:
+  branding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BLENDER: blender-4.2.3-linux-x64
+    steps:
+      - uses: actions/checkout@v4
+      - name: System packages and fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libglx-mesa0 libgl1-mesa-dri libegl1 libxi6 \
+            libxkbcommon0 libsm6 libxrender1 libxxf86vm1 libxfixes3 libxkbcommon-x11-0
+          bash render/fetch_assets.sh fonts
+      - uses: actions/cache@v4
+        with:
+          path: ~/blender
+          key: ${{ env.BLENDER }}
+      - name: Blender
+        run: |
+          if [ ! -x ~/blender/$BLENDER/blender ]; then
+            mkdir -p ~/blender
+            curl -fsSL https://download.blender.org/release/Blender4.2/$BLENDER.tar.xz | tar -xJ -C ~/blender
+          fi
+      - name: Render avatar and banner
+        run: |
+          xvfb-run -a ~/blender/$BLENDER/blender -b --python render3d/branding.py -- out/branding 128 \
+            2>&1 | grep -E "BRANDING|Error|Traceback|File \"" || true
+          ls -la out/branding
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ask-gus-branding
+          path: out/branding/*.png
+          retention-days: 30
