@@ -46,7 +46,7 @@ def s01(d):
     """Hook: garage money machine blasting cash at the camera, legal and glowing."""
     lighting("interior")
     ground(mat(C["grey"], 0.8))
-    box((0, 3.2, 3), (14, 0.3, 6), mat(C["grey_d"], 0.9), 0)                 # back wall
+    box((0, 3.2, 5), (16, 0.3, 10), mat(C["grey_d"], 0.9), 0)                # back wall (tall: no gap)
     door = box((-3.6, 3.0, 1.6), (3.2, 0.12, 3.2), mat(C["white"], 0.6), 0.03)
     for k in range(6):
         box((-3.6, 2.92, 0.3 + k * 0.5), (3.2, 0.04, 0.05), mat(C["grey"], 0.5), 0)
@@ -59,8 +59,8 @@ def s01(d):
     text("$1,000,000 / MIN", (0.2, 1.32, 3.65), 0.32, mat(C["red"], 0.4))
     text("100% LEGAL", (0.2, 0.55, 1.75), 0.2, mat(C["money_d"], 0.4))
     pile = CashStack((-1.9, 0.4, 0), (1.2, 0.8))
-    boss = Person("boss", (2.2, 0.2, 0), rot_z=-0.3)
-    flyers = [box((0, 0, 0), (0.5, 0.25, 0.015), mat(C["money"], 0.6), 0.005) for _ in range(26)]
+    boss = Person("boss", (1.75, 0.3, 0), rot_z=-0.3)
+    flyers = [box((0, 0, 0), (0.42, 0.2, 0.012), mat(C["money"], 0.6), 0.005) for _ in range(16)]
     cam = Cam(28, dof=3.0)
 
     def update(t):
@@ -70,12 +70,13 @@ def s01(d):
         for i, b in enumerate(flyers):
             u = ((t * 1.4) + i / len(flyers)) % 1.0
             a = i * 2.399
-            b.location = (0.2 + math.cos(a) * u * 2.6, 0.6 - u * 5.5, 1.6 + math.sin(a) * u * 1.8
-                          + math.sin(u * math.pi) * 0.8)
+            side = -1 if i % 2 else 1      # arc out to the sides, never straight at the lens
+            b.location = (0.2 + side * (0.6 + u * 2.4) + math.cos(a) * 0.3, 0.6 - u * 2.6,
+                          2.2 + math.sin(u * math.pi) * 1.6 - u * 1.4)
             b.rotation_euler = (u * 7 + i, u * 5, i * 0.7)
         rush = prog(t, 0.0, min(1.0, d * 0.35))
-        cam.set((lerp(0.0, 0.4, rush), lerp(-11, -4.6, rush), lerp(3.0, 2.1, rush)),
-                (0.2, 1.2, lerp(2.2, 1.9, rush)), t)
+        cam.set((lerp(0.0, 0.5, rush), lerp(-12, -6.8, rush), lerp(3.2, 2.5, rush)),
+                (0.5, 1.2, lerp(2.5, 2.3, rush)), t)
     return update
 
 
