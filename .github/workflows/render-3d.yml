@@ -26,6 +26,10 @@ env:
   SHARDS: 18
   BLENDER: blender-4.2.3-linux-x64
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   prep:
     name: Voice, sound mix and shot plan
@@ -157,6 +161,15 @@ jobs:
           path: out/${{ env.NAME }}.mp4
           compression-level: 0
           retention-days: 30
+      - name: Publish 4K video as a release (one-tap download)
+        if: env.MODE == 'full'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp "out/$NAME.mp4" "out/${SHORT}-ask-gus-4k.mp4"
+          gh release create "${SHORT}-$(date -u +%Y%m%d-%H%M)" "out/${SHORT}-ask-gus-4k.mp4" \
+            --repo "$GITHUB_REPOSITORY" --title "${SHORT} (4K)" \
+            --notes "Ask Gus Short ${SHORT}, 2160x3840. Tap the .mp4 below to download."
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.SHORT }}-preview
